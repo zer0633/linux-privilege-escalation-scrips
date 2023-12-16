@@ -73,6 +73,7 @@ history
 #check if we can write to shadow or passwd
 find /  -name "passwd" -writeable -user root 2>/dev/null | grep --color=auto -ie "/etc/passwd"
 find /  -name "shadow" -writeable -user root 2>/dev/null | grep --color=auto -ie "/etc/shadow"
+find /  -name "shadow" -readable -user root 2>/dev/null | grep --color=auto -ie "/etc/shadow"
 
 #enumerating for passwords
 grep -rnw '/' -ie "PASSWORD=" --color=auto --color=always 2>/dev/null
