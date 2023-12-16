@@ -6,30 +6,27 @@
 whoami <== gets the users username we are logged in as 
 id <== we can see which groups we are apart of
 
-#check for sudo -l nopassword
-sudo -l <== if no password check gtfobins to see if we can exploit the executable associated with it 
-
-#check if we can just switch users to root with root as the password
-sudo su - root
-
-#check history maybe something was left behind
-history
+#get the hostname
+hostname <== gets the hostname and provides information about the operating system its running
 
 #get all users 
 cat /etc/passwd <==gets all account usernames
 cat /etc/passwd | grep -e "/bin/bash" -e "/bin/sh" -e "/bin/dash" -e "/bin/zsh" <== gets all users with valid shells
-
-#get the hostname
-hostname <== gets the hostname and provides information about the operating system its running
 
 #enumerating os system version and arch
 cat /ec/issue <== gets the version of linux and os used
 cat /etc/*-release <== gets similar to above
 uname -a <== finds the kernel version and arch
 
+#enumerating auto elevate services
+find / -perm -u=s -type f 2>/dev/null <== finds all files with suid bit set
+
+#check for schedualed tasks
+ls -lah /etc/cron* 
+cat /etc/crontab <== usually from admins and have weak privileges
+
 #enumerating running processes and services
 ps aux <== lists all processes 
-
 
 #enumerating network info used for pivoting or if a port is only open on a loopback address
 ifconfig -a <== view the tcp/ip config of every network adapter on the box
@@ -39,14 +36,14 @@ netstat -anp  <==display active connections and listening ports
 #enumerating firewall rules < only useful when during remote exploitation 
 grep -Hs iptables /etc/* <==dumps iptable to user specified file if any exist
 
-#check for schedualed tasks
-ls -lah /etc/cron* 
-cat /etc/crontab <== usually from admins and have weak privileges
-
 #check patches and installed applications
 dpkg -l <== lists all applications running on debian os
 
-#enumerating read/writeable directory and file privileges
+#enumerate writeable directories and files with user root as owner
+find / -writeable -type d -user root 2>/dev/null <== enumerates all directories we can write to
+find / -writeable -type f -user root 2>/dev/null <== enumerats all files we can write to
+
+#enumerating all current user writeable directory and file privileges
 find / -writeable -type d 2>/dev/null <== enumerates all directories we can write to
 find / -writeable -type f 2>/dev/null <== enumerats all files we can write to
 
@@ -59,5 +56,41 @@ lsblk <== view all partitions
 lsmod <== shows all drivers 
 /sbin/modinfo <drivername> <<== lists information about the driver in question then check to see if any exploits exist for them
 
-#enumerating auto elevate services
-find / -perm -u=s -type f 2>/dev/null <== finds all files with suid bit set
+
+
+
+####################EXTRA STUUFF TO TRY###################################
+
+#check for sudo -l nopassword
+sudo -l <== if no password check gtfobins to see if we can exploit the executable associated with it 
+
+#check if we can just switch users to root with root as the password
+sudo su - root
+
+#check history maybe something was left behind
+history
+
+#check if we can write to shadow or passwd
+find /  -name "passwd" -writeable -user root 2>/dev/null | grep --color=auto -ie "/etc/passwd"
+find /  -name "shadow" -writeable -user root 2>/dev/null | grep --color=auto -ie "/etc/shadow"
+
+#enumerating for passwords
+grep -rnw '/' -ie "PASSWORD=" --color=auto --color=always 2>/dev/null
+
+#enumerating usernames and passwords
+grep -rnw '/' -ie "PASSWORD=" -ie "pass=" -ie "user=" -ie "username=" --color=auto --color=always 2>/dev/null
+
+#checking for secret usually passwords
+grep -rnw '/' -ie "secret" --color=auto --color=always 2>/dev/null
+
+#checking for root owned but readble to us config files
+find / -name "*conf" -type f -user root -readable 2>/dev/null
+
+#check for our user owned config files we can read
+find / -name "*conf" -type f -readable 2>/dev/null
+
+#check for id_rsa keys
+find / -name "id_rsa" -type f -readable 2>/dev/null
+
+#check for authorized_keys
+find / -name "authorized_keys" -type f 2>/dev/null
