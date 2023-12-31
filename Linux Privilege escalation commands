@@ -84,6 +84,9 @@ grep -rnw '/' -ie "PASSWORD=" -ie "pass=" -ie "user=" -ie "username=" --color=au
 #checking for secret usually passwords
 grep -rnw '/' -ie "secret" --color=auto --color=always 2>/dev/null
 
+#find any file with credential in the name
+find / -name "*credential*" -type f -readable 2>/dev/null
+
 #checking for root owned but readble to us config files
 find / -name "*conf" -type f -user root -readable 2>/dev/null
 
